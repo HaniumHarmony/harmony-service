@@ -1,47 +1,56 @@
 package io.harmony.harmonyservice.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"kakao_id"})
+})
 public class User {
-
+    /* -------------------------------------------- */
+    /* -------------- Default Column -------------- */
+    /* -------------------------------------------- */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String kakaoName;
-    private String email;
+
+    @Column(name = "kakao_id", nullable = false)
+    private int kakaoId;
+
+    /* -------------------------------------------- */
+    /* ------------ Information Column ------------ */
+    /* -------------------------------------------- */
+    @Column(name = "nickname", nullable = false, length = 50)
     private String nickname;
 
-    // getter 및 setter 메서드
-    public Long getId() {
-        return id;
-    }
+    @Column(name = "level", nullable = false, length = 10)
+    private String level; // 이거 Enum으로 바꾸는게 좋을 듯
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    /* -------------------------------------------- */
+    /* -------------- Relation Column ------------- */
+    /* -------------------------------------------- */
+    // User가 KakaoAccount를 참조하는 일대일 관계 설정
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "kakao_id", referencedColumnName = "kakao_id") // 동일한 key를 사용할 지에 따라 바꿀 수 있음
+    private List<KakaoAccount> kakaoAccounts;
 
-    public String getKakaoName() {
-        return kakaoName;
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Music> musics;
 
-    public void setKakaoName(String kakaoName) {
-        this.kakaoName = kakaoName;
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Lesson> lessons;
 
-    public String getEmail() {
-        return email;
-    }
+    /* -------------------------------------------- */
+    /* ----------------- Functions ---------------- */
+    /* -------------------------------------------- */
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    // 여기에 함수 관련 코드 작성
 
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
 }
